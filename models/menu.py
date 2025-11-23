@@ -9,9 +9,9 @@ class Menu:
     def get_menu_by_restaurant(res_id):
         cursor = db.cursor(dictionary=True)
         sql = """
-            SELECT m.MenuID, m.RestaurantID, m.MenuName,
-                   mi.MenuItemID, mi.ItemName, mi.Description, 
-                   mi.Price, mi.IsAvailable
+            SELECT m.MenuID, m.RestaurantID, m.Name,
+                   mi.MenuItemID, mi.Name as ItemName, mi.Description, 
+                   mi.image,mi.Price, mi.IsAvailable
             FROM menu m
             LEFT JOIN menuitem mi ON m.MenuID = mi.MenuID
             WHERE m.RestaurantID = %s

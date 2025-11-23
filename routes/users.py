@@ -50,7 +50,7 @@ def register_user():
     if user_row:
         return jsonify({"error": "Email Already Exist"}), 401
 
-    # 1️⃣ CREATE USER IN DATABASE (UNVERIFIED)
+    # CREATE USER IN DATABASE (UNVERIFIED)
     user = UserAccount(
         FirstName=data.get("first_name"),
         LastName=data.get("last_name"),
@@ -64,7 +64,7 @@ def register_user():
     if not success:
         return jsonify({"error": "Failed to save user"}), 500
 
-    # 2️⃣ GENERATE OTP
+    # GENERATE OTP
     otp = random.randint(100000, 999999)
     expires = datetime.utcnow() + timedelta(minutes=5)
 
@@ -73,7 +73,6 @@ def register_user():
         "expires": expires
     }
 
-    # 3️⃣ SEND OTP EMAIL
     try:
         send_otp_email(email, otp)
     except Exception as e:
@@ -107,7 +106,7 @@ def verify_otp():
     if int(otp_input) != record["otp"]:
         return jsonify({"error": "invalid otp"}), 400
 
-    # 1️⃣ MARK EMAIL VERIFIED IN DB
+    # MARK EMAIL VERIFIED IN DB
     cursor = db.cursor()
     cursor.execute("UPDATE useraccount SET IsEmailVerified = 1 WHERE Email = %s", (email,))
     db.commit()

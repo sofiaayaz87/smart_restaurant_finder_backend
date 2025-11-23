@@ -43,14 +43,15 @@ class Recommender:
             r.RestaurantID,
             r.Name,
             r.PriceRange,
-            COALESCE(r.AvgRating, 0) AS AvgRating,
-            COALESCE(r.TotalRatings, 0) AS TotalRatings,
+            ROUND(AVG(rt.RatingScore), 1) AS Rating,
+            Count(rt.RatingScore) As RatedBy
             a.Area AS Area,
             GROUP_CONCAT(DISTINCT c.CuisineType SEPARATOR ', ') AS Cuisines
         FROM restaurant r
         LEFT JOIN address a ON r.AddressID = a.AddressID
         LEFT JOIN restaurantcuisine rc ON r.RestaurantID = rc.RestaurantID
         LEFT JOIN cuisine c ON rc.CuisineID = c.CuisineID
+        LEFT JOIN rating rt ON r.RestaurantID = rt.RestaurantID
         WHERE r.IsActive = 1
         """
 
@@ -69,7 +70,7 @@ class Recommender:
 
         # Rating filter
         if min_rating is not None:
-            sql += " AND r.AvgRating >= %s"
+            sql += " AND r.Rating >= %s"
             params.append(min_rating)
 
         # LOCATION FILTER
@@ -79,7 +80,7 @@ class Recommender:
           params.append(f"%{location}%")  # adds wildcard before and after
 
 
-        sql += " GROUP BY r.RestaurantID, r.Name, r.PriceRange, r.AvgRating, r.TotalRatings, a.Area"
+        sql += " GROUP BY r.RestaurantID, r.Name, r.PriceRange, rt.RatingScore, a.Area"
 
         # Sorting
         if sort_by == "rating":
